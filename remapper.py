@@ -56,48 +56,48 @@ def remapper(i, o, m):
     src_files = list(output_path.joinpath("src").rglob("*.java"))
     maps = list(maps_path.glob("*.csv"))
 
-    if src_files:
-        for s in src_files:
-            file_src = s.read_text()
-            searges = []
-            params = []
+    if not src_files:
+        exit_script("No sources to remap!")
 
-            for m in maps:
-                with m.open() as csv:
-                    csv_content = DictReader(csv)
+    for s in src_files:
+        file_src = s.read_text()
+        searges = []
+        params = []
 
-                    for row in csv_content:
-                        if "searge" in row:
-                            if row["searge"] in file_src:
-                                searges.append({
-                                    "searge": row["searge"],
-                                    "name": row["name"]
-                                })
-                        if "param" in row:
-                            if row["param"] in file_src:
-                                params.append({
-                                    "param": row["param"],
-                                    "name": row["name"]
-                                })
+        for m in maps:
+            with m.open() as csv:
+                csv_content = DictReader(csv)
 
-            if searges:
-                for i in searges:
-                    s.write_text(
-                        apply_map(i["searge"], i["name"], s.read_text(), s.name)
-                    )
+                for row in csv_content:
+                    if "searge" in row and row["searge"] in file_src:
+                            searges.append({
+                                "searge": row["searge"],
+                                "name": row["name"]
+                            })
+                    if "param" in row and row["param"] in file_src:
+                            params.append({
+                                "param": row["param"],
+                                "name": row["name"]
+                            })
 
-            if params:
-                for i in params:
-                    s.write_text(
-                        apply_map(i["param"], i["name"], s.read_text(), s.name)
-                    )
+        if searges:
+            for i in searges:
+                s.write_text(
+                    apply_map(i["searge"], i["name"], s.read_text(), s.name)
+                )
 
-        root_dir = output_path.joinpath("src")
-        make_archive("sources", "zip", root_dir)
-        rmtree(root_dir)
-        move(Path().joinpath("sources.zip"), output_path)
+        if params:
+            for i in params:
+                s.write_text(
+                    apply_map(i["param"], i["name"], s.read_text(), s.name)
+                )
 
-        print("\nConversion complete. A zip file has been created in the output folder.")
+    root_dir = output_path.joinpath("src")
+    make_archive("sources", "zip", root_dir)
+    rmtree(root_dir)
+    move(Path().joinpath("sources.zip"), output_path)
+
+    print("\nConversion complete. A zip file has been created in the output folder.")
 
 
 def main():
