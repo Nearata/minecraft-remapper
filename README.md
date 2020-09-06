@@ -1,4 +1,4 @@
-# MC-Remapper
+# Minecraft Remapper
 
 > A Minecraft remapper for already deobfuscated source code
 
@@ -22,7 +22,7 @@ Clone this repo or download the zip
 
 ## License
 
-Distributed under the MIT license. See ```LICENSE``` for more information.
+Distributed under the MIT license. See `LICENSE` for more information.
 
 ## Contributing
 
