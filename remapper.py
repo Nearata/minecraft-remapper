@@ -101,7 +101,7 @@ class Remapper:
         if not list(self.mappings.glob("*.csv")):
             exit_script("The --mappings path directory is empty.")
 
-    def __apply_map(self, find, replace, string, filename):
+    def __apply_map(self, find: str, replace: str, string: str, filename: str) -> str:
         print(f"{filename}: {find} >> {replace}")
         return sub(find, replace, string)
 
