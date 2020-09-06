@@ -6,6 +6,10 @@
 
 - Python 3.8
 
+## Installation
+
+Clone this repo or download the zip
+
 ## Required parameters
 
 ```text
@@ -15,10 +19,6 @@
 
 --mappings / -m: Path to mcp mappings folder (can be found in gradle caches folder in de/oceanlabs/mcp subdirectory).
 ```
-
-## Installation
-
-Clone this repo or download the zip
 
 ## License
 
