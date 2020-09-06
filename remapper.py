@@ -41,7 +41,7 @@ def remapper(i, o, m):
         exit_script("The --mappings path directory is empty.")
 
     if not list(sources_path.rglob("*.java")):
-        exit_script("No .java file to convert.")
+        exit_script("No sources to remap.")
 
     src_path = output_path.joinpath("src")
     if not src_path.exists():
@@ -50,14 +50,12 @@ def remapper(i, o, m):
     for i in sources_path.glob("*"):
         if i.is_file():
             copyfile(i, src_path.joinpath(i.name))
+
         if i.is_dir():
             copytree(i, src_path.joinpath(i.name))
 
     src_files = list(output_path.joinpath("src").rglob("*.java"))
     maps = list(maps_path.glob("*.csv"))
-
-    if not src_files:
-        exit_script("No sources to remap!")
 
     for s in src_files:
         file_src = s.read_text()
@@ -95,7 +93,7 @@ def remapper(i, o, m):
     root_dir = output_path.joinpath("src")
     make_archive("sources", "zip", root_dir)
     rmtree(root_dir)
-    move(Path().joinpath("sources.zip"), output_path)
+    move(str(Path().joinpath("sources.zip")), str(output_path))
 
     print("\nConversion complete. A zip file has been created in the output folder.")
 
