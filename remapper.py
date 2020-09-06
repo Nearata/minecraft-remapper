@@ -11,91 +11,97 @@ def apply_map(find, replace, string, filename):
     return sub(find, replace, string)
 
 
-def remapper(i, o, m):
-    sources_path = Path().joinpath(i)
-    output_path = Path().joinpath(o)
-    maps_path = Path().joinpath(m)
+class Remapper:
+    def __init__(self, i, o, m) -> None:
+        self.i = i
+        self.o = o
+        self.m = m
 
-    if not sources_path.exists():
-        exit_script("The --input path does not exists.")
+    def __call__(self) -> None:
+        sources_path = Path().joinpath(self.i)
+        output_path = Path().joinpath(self.o)
+        maps_path = Path().joinpath(self.m)
 
-    if not sources_path.is_dir():
-        exit_script("The --input path must be a directory.")
+        if not sources_path.exists():
+            exit_script("The --input path does not exists.")
 
-    if not list(sources_path.glob("*")):
-        exit_script("The --input path directory is empty.")
+        if not sources_path.is_dir():
+            exit_script("The --input path must be a directory.")
 
-    if not output_path.exists():
-        exit_script("The --output path does not exists.")
+        if not list(sources_path.glob("*")):
+            exit_script("The --input path directory is empty.")
 
-    if not output_path.is_dir():
-        exit_script("The --output path must be a directory.")
+        if not list(sources_path.rglob("*.java")):
+            exit_script("No sources to remap.")
 
-    if list(output_path.glob("*")):
-        exit_script("The --output path directory is not empty.")
+        if not output_path.exists():
+            exit_script("The --output path does not exists.")
 
-    if not maps_path.exists():
-        exit_script("The --mappings path does not exists.")
+        if not output_path.is_dir():
+            exit_script("The --output path must be a directory.")
 
-    if not list(maps_path.glob("*.csv")):
-        exit_script("The --mappings path directory is empty.")
+        if list(output_path.glob("*")):
+            exit_script("The --output path directory is not empty.")
 
-    if not list(sources_path.rglob("*.java")):
-        exit_script("No sources to remap.")
+        if not maps_path.exists():
+            exit_script("The --mappings path does not exists.")
 
-    src_path = output_path.joinpath("src")
-    if not src_path.exists():
-        src_path.mkdir()
+        if not list(maps_path.glob("*.csv")):
+            exit_script("The --mappings path directory is empty.")
 
-    for i in sources_path.glob("*"):
-        if i.is_file():
-            copyfile(i, src_path.joinpath(i.name))
+        src_path = output_path.joinpath("src")
+        if not src_path.exists():
+            src_path.mkdir()
 
-        if i.is_dir():
-            copytree(i, src_path.joinpath(i.name))
+        for i in sources_path.glob("*"):
+            if i.is_file():
+                copyfile(i, src_path.joinpath(i.name))
 
-    src_files = list(output_path.joinpath("src").rglob("*.java"))
-    maps = list(maps_path.glob("*.csv"))
+            if i.is_dir():
+                copytree(i, src_path.joinpath(i.name))
 
-    for s in src_files:
-        file_src = s.read_text()
-        searges = []
-        params = []
+        src_files = list(output_path.joinpath("src").rglob("*.java"))
+        maps = list(maps_path.glob("*.csv"))
 
-        for m in maps:
-            with m.open() as csv:
-                csv_content = DictReader(csv)
+        for s in src_files:
+            file_src = s.read_text()
+            searges = []
+            params = []
 
-                for row in csv_content:
-                    if "searge" in row and row["searge"] in file_src:
-                            searges.append({
-                                "searge": row["searge"],
-                                "name": row["name"]
-                            })
-                    if "param" in row and row["param"] in file_src:
-                            params.append({
-                                "param": row["param"],
-                                "name": row["name"]
-                            })
+            for m in maps:
+                with m.open() as csv:
+                    csv_content = DictReader(csv)
 
-        if searges:
-            for i in searges:
-                s.write_text(
-                    apply_map(i["searge"], i["name"], s.read_text(), s.name)
-                )
+                    for row in csv_content:
+                        if "searge" in row and row["searge"] in file_src:
+                                searges.append({
+                                    "searge": row["searge"],
+                                    "name": row["name"]
+                                })
+                        if "param" in row and row["param"] in file_src:
+                                params.append({
+                                    "param": row["param"],
+                                    "name": row["name"]
+                                })
 
-        if params:
-            for i in params:
-                s.write_text(
-                    apply_map(i["param"], i["name"], s.read_text(), s.name)
-                )
+            if searges:
+                for i in searges:
+                    s.write_text(
+                        apply_map(i["searge"], i["name"], s.read_text(), s.name)
+                    )
 
-    root_dir = output_path.joinpath("src")
-    make_archive("sources", "zip", root_dir)
-    rmtree(root_dir)
-    move(str(Path().joinpath("sources.zip")), str(output_path))
+            if params:
+                for i in params:
+                    s.write_text(
+                        apply_map(i["param"], i["name"], s.read_text(), s.name)
+                    )
 
-    print("\nConversion complete. A zip file has been created in the output folder.")
+        root_dir = output_path.joinpath("src")
+        make_archive("sources", "zip", root_dir)
+        rmtree(root_dir)
+        move(str(Path().joinpath("sources.zip")), str(output_path))
+
+        print("\nConversion complete. A zip file has been created in the output folder.")
 
 
 def main():
@@ -122,7 +128,8 @@ def main():
 
     args = arg_parser.parse_args()
 
-    remapper(args.input, args.output, args.mappings)
+    remapper = Remapper(args.input, args.output, args.mappings)
+    remapper()
 
 
 if __name__ == "__main__":
