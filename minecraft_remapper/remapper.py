@@ -1,9 +1,10 @@
 from pathlib import Path
 from re import sub
 from csv import DictReader
-from argparse import ArgumentParser
 from shutil import copytree, copyfile, make_archive, rmtree, move
 from sys import exit as exit_script
+
+from colorama import Fore as colorama_fore
 
 
 class Remapper:
@@ -73,66 +74,37 @@ class Remapper:
 
     def __check_sources_path(self) -> None:
         if not self.input.exists():
-            exit_script("The --input path does not exists.")
+            self.__exit_script("The --input path does not exists.")
 
         if not self.input.is_dir():
-            exit_script("The --input path must be a directory.")
+            self.__exit_script("The --input path must be a directory.")
 
         if not list(self.input.glob("*")):
-            exit_script("The --input path directory is empty.")
+            self.__exit_script("The --input path directory is empty.")
 
         if not list(self.input.rglob("*.java")):
-            exit_script("No sources to remap.")
+            self.__exit_script("No sources to remap.")
 
     def __check_output_path(self) -> None:
         if not self.output.exists():
-            exit_script("The --output path does not exists.")
+            self.__exit_script("The --output path does not exists.")
 
         if not self.output.is_dir():
-            exit_script("The --output path must be a directory.")
+            self.__exit_script("The --output path must be a directory.")
 
         if list(self.output.glob("*")):
-            exit_script("The --output path directory is not empty.")
+            self.__exit_script("The --output path directory is not empty.")
 
     def __check_mappings_path(self) -> None:
         if not self.mappings.exists():
-            exit_script("The --mappings path does not exists.")
+            self.__exit_script("The --mappings path does not exists.")
 
         if not list(self.mappings.glob("*.csv")):
-            exit_script("The --mappings path directory is empty.")
+            self.__exit_script("The --mappings path directory is empty.")
+
+    def __exit_script(self, message):
+        exit_script(f"{colorama_fore.LIGHTRED_EX}[ERROR] {colorama_fore.LIGHTYELLOW_EX + message}")
 
     def __apply_map(self, find: str, replace: str, string: str, filename: str) -> str:
-        print(f"{filename}: {find} >> {replace}")
+        print(f"{colorama_fore.LIGHTGREEN_EX}[Minecraft Remapper] {colorama_fore.LIGHTYELLOW_EX}{filename}: {colorama_fore.LIGHTWHITE_EX}{find} {colorama_fore.LIGHTCYAN_EX}>> {colorama_fore.LIGHTWHITE_EX}{replace}")
         return sub(find, replace, string)
-
-
-def main():
-    arg_parser = ArgumentParser(
-        "Minecraft Remapper",
-        description="Remap a deobfuscated minecraft mod code."
-    )
-
-    arg_parser.add_argument(
-        "--input", "-i",
-        help="Path to mod source files directory.",
-        required=True
-    )
-    arg_parser.add_argument(
-        "--output", "-o",
-        help="Path to where you want to save the converted source code.",
-        required=True, default=""
-    )
-    arg_parser.add_argument(
-        "--mappings", "-m",
-        help="Path to where the program can find mappings.",
-        required=True
-    )
-
-    args = arg_parser.parse_args()
-
-    remapper = Remapper(args.input, args.output, args.mappings)
-    remapper()
-
-
-if __name__ == "__main__":
-    main()

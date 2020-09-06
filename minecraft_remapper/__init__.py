@@ -1,0 +1,1 @@
+from minecraft_remapper.remapper import Remapper

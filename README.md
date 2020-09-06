@@ -1,6 +1,6 @@
 # Minecraft Remapper
 
-> A Minecraft remapper for already deobfuscated source code
+> A Minecraft remapper for already deobfuscated source code.
 
 ## Requirements
 
@@ -8,17 +8,27 @@
 
 ## Installation
 
-Clone this repo or download the zip
-
-## Required parameters
-
-```text
---input / -i: Path to deobfuscated and decompiled mod source code.
-
---output / -o: Path to an existing directory where the script will save the source code remapped in a zip file named sources.zip.
-
---mappings / -m: Path to mcp mappings folder (can be found in gradle caches folder in de/oceanlabs/mcp subdirectory).
+```sh
+pip install minecraft-remapper
 ```
+
+## Usage
+
+```sh
+python -m mc_remapper
+```
+
+or
+
+```sh
+python -m mc_remapper -i <input_directory> -o <output_directory> -m <mappings_directory>
+```
+
+## Parameters
+
+- `-i` / `--input`: Path to deobfuscated and decompiled mod source code.
+- `-o` / `--output`: Path to an existing directory where the script will save the source code remapped in a zip file named `sources.zip`.
+- `-m` / `--mappings`: Path to mcp mappings folder (`fields.csv`, `methods.csv` and `params.csv`).
 
 ## License
 
