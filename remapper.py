@@ -6,11 +6,6 @@ from shutil import copytree, copyfile, make_archive, rmtree, move
 from sys import exit as exit_script
 
 
-def apply_map(find, replace, string, filename):
-    print(f"{filename}: {find} >> {replace}")
-    return sub(find, replace, string)
-
-
 class Remapper:
     def __init__(self, i, o, m) -> None:
         self.input = Path().joinpath(i)
@@ -60,13 +55,13 @@ class Remapper:
             if searges:
                 for i in searges:
                     s.write_text(
-                        apply_map(i["searge"], i["name"], s.read_text(), s.name)
+                        self.__apply_map(i["searge"], i["name"], s.read_text(), s.name)
                     )
 
             if params:
                 for i in params:
                     s.write_text(
-                        apply_map(i["param"], i["name"], s.read_text(), s.name)
+                        self.__apply_map(i["param"], i["name"], s.read_text(), s.name)
                     )
 
         root_dir = self.output.joinpath("src")
@@ -105,6 +100,10 @@ class Remapper:
 
         if not list(self.mappings.glob("*.csv")):
             exit_script("The --mappings path directory is empty.")
+
+    def __apply_map(self, find, replace, string, filename):
+        print(f"{filename}: {find} >> {replace}")
+        return sub(find, replace, string)
 
 
 def main():
