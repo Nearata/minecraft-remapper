@@ -15,13 +15,13 @@ pip install minecraft-remapper
 ## Usage
 
 ```sh
-python -m mc_remapper
+python -m minecraft_remapper
 ```
 
 or
 
 ```sh
-python -m mc_remapper -i <input_directory> -o <output_directory> -m <mappings_directory>
+python -m minecraft_remapper -i <input_directory> -o <output_directory> -m <mappings_directory>
 ```
 
 ## Parameters
