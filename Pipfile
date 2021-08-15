@@ -4,14 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pylint = "*"
-setuptools = "*"
-wheel = "*"
-twine = "*"
+black = "==21.7b0"
+isort = "*"
+mypy = "*"
+flit = "*"
 
 [packages]
-click = "*"
-colorama = "*"
+typer = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

@@ -4,7 +4,7 @@
 
 ## Requirements
 
-- Python 3.8
+- Python >=3.9
 
 ## Installation
 
@@ -15,28 +15,21 @@ pip install minecraft-remapper
 ## Usage
 
 ```sh
-python -m minecraft_remapper
+python -m minecraft_remapper --i <text> --o <text> --m <text>
 ```
 
-or
+### Example
 
 ```sh
-python -m minecraft_remapper -i <input_directory> -o <output_directory> -m <mappings_directory>
+python -m minecraft_remapper --i input_folder --o output_folder --m mappings_file.tsrg
 ```
 
 ## Parameters
 
-- `-i` / `--input`: Path to deobfuscated and decompiled mod source code.
-- `-o` / `--output`: Path to an existing directory where the script will save the source code remapped in a zip file named `sources.zip`.
-- `-m` / `--mappings`: Path to mcp mappings folder (`fields.csv`, `methods.csv` and `params.csv`).
+- `--i`: Path to deobfuscated and decompiled mod source code.
+- `--o`: Path to an existing directory where the script will save the source code remapped in a zip file named `sources.zip`.
+- `--m`: Path to mappings file (`<filename>.tsrg`)
 
 ## License
 
-Distributed under the MIT license. See `LICENSE` for more information.
-
-## Contributing
-
-1. Fork it
-2. Commit your changes
-3. Push to the branch
-4. Create a new Pull Request
+Distributed under the MIT license. See [LICENSE](LICENSE) for details.

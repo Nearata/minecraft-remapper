@@ -1,17 +1,15 @@
 from pathlib import Path
-from re import sub
-from csv import DictReader
-from shutil import copytree, copyfile, make_archive, rmtree, move
-from sys import exit as exit_script
+from re import sub as re_sub
+from shutil import copyfile, copytree, make_archive, move, rmtree
 
-from colorama import Fore as colorama_fore
+import typer
 
 
 class Remapper:
-    def __init__(self, i, o, m) -> None:
-        self.input = Path().joinpath(i)
-        self.output = Path().joinpath(o)
-        self.mappings = Path().joinpath(m)
+    def __init__(self, input: str, output: str, mappings: str) -> None:
+        self.input = Path().joinpath(input)
+        self.output = Path().joinpath(output)
+        self.mappings = Path(mappings)
 
     def __call__(self) -> None:
         self.__check_sources_path()
@@ -29,40 +27,20 @@ class Remapper:
             if i.is_dir():
                 copytree(i, src_path.joinpath(i.name))
 
-        src_files = list(self.output.joinpath("src").rglob("*.java"))
-        maps = list(self.mappings.glob("*.csv"))
+        files = list(self.output.joinpath("src").rglob("*.java"))
 
-        for s in src_files:
-            file_src = s.read_text()
-            searges = []
-            params = []
+        for f in files:
+            content = f.read_text()
+            subs: list[dict[str, str]] = []
 
-            for m in maps:
-                with m.open() as csv:
-                    csv_content = DictReader(csv)
+            for k, v in self.__read_tsrg(self.mappings).items():
+                if k in content:
+                    subs.append({"find": k, "replace": v})
 
-                    for row in csv_content:
-                        if "searge" in row and row["searge"] in file_src:
-                                searges.append({
-                                    "searge": row["searge"],
-                                    "name": row["name"]
-                                })
-                        if "param" in row and row["param"] in file_src:
-                                params.append({
-                                    "param": row["param"],
-                                    "name": row["name"]
-                                })
-
-            if searges:
-                for i in searges:
-                    s.write_text(
-                        self.__apply_map(i["searge"], i["name"], s.read_text(), s.name)
-                    )
-
-            if params:
-                for i in params:
-                    s.write_text(
-                        self.__apply_map(i["param"], i["name"], s.read_text(), s.name)
+            if subs:
+                for s in subs:
+                    f.write_text(
+                        self.__apply_map(s["find"], s["replace"], f.read_text(), f.name)
                     )
 
         root_dir = self.output.joinpath("src")
@@ -70,7 +48,9 @@ class Remapper:
         rmtree(root_dir)
         move(str(Path().joinpath("sources.zip")), str(self.output))
 
-        print("\nConversion complete. A zip file has been created in the output folder.")
+        typer.echo(
+            "\nConversion complete. A zip file has been created in the output folder."
+        )
 
     def __check_sources_path(self) -> None:
         if not self.input.exists():
@@ -97,14 +77,36 @@ class Remapper:
 
     def __check_mappings_path(self) -> None:
         if not self.mappings.exists():
-            self.__exit_script("The --mappings path does not exists.")
+            self.__exit_script("The --mappings file does not exists.")
 
-        if not list(self.mappings.glob("*.csv")):
-            self.__exit_script("The --mappings path directory is empty.")
+        if not self.mappings.is_file():
+            self.__exit_script("--mappings argument doesn't point to a file.")
 
-    def __exit_script(self, message):
-        exit_script(f"{colorama_fore.LIGHTRED_EX}[ERROR] {colorama_fore.LIGHTYELLOW_EX + message}")
+    def __exit_script(self, message: str) -> None:
+        typer.secho(f"[ERROR:] {message}", fg=typer.colors.BRIGHT_RED)
+        raise typer.Abort()
 
     def __apply_map(self, find: str, replace: str, string: str, filename: str) -> str:
-        print(f"{colorama_fore.LIGHTGREEN_EX}[Minecraft Remapper] {colorama_fore.LIGHTYELLOW_EX}{filename}: {colorama_fore.LIGHTWHITE_EX}{find} {colorama_fore.LIGHTCYAN_EX}>> {colorama_fore.LIGHTWHITE_EX}{replace}")
-        return sub(find, replace, string)
+        typer.secho(
+            f"[INFO:] {filename}: {find} >> {replace}", fg=typer.colors.BRIGHT_GREEN
+        )
+        return re_sub(find, replace, string)
+
+    def __read_tsrg(self, file: Path) -> dict[str, str]:
+        dct: dict[str, str] = {}
+
+        with file.open() as f:
+            lines = f.readlines()
+
+        for l in lines:
+            curr = l.strip().split(" ")
+
+            if not curr[0].startswith(("f_", "field_", "m_", "func_")):
+                continue
+
+            if len(curr) < 3:
+                curr.insert(1, "")
+
+            dct[curr[0]] = curr[2]
+
+        return dct
