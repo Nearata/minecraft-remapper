@@ -1,6 +1,7 @@
 .vscode/*
 input/*
 output/*
+*.tsrg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
