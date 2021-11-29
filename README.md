@@ -30,6 +30,6 @@ python -m minecraft_remapper --i input_folder --o output_folder --m mappings_fil
 - `--o`: Path to an existing directory where the script will save the source code remapped in a zip file named `sources.zip`.
 - `--m`: Path to mappings file (`<filename>.tsrg`)
 
-## License
+## Unlicense
 
-Distributed under the MIT license. See [LICENSE](LICENSE) for details.
+See [UNLICENSE](UNLICENSE) for details.
